@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Estoque - naturAYO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="shortcut icon" href="imagens/favicon.ico" type="image/x-icon"/>
+
+  <!-- jQuery (requerido para Select2) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <!-- Select2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="logo-area">
+      <img src="imagens/logo1.png" alt="Logo naturAYO" />
+      <h1>naturAYO</h1>
+    </div>
+    <div class="user-info">
+      <img src="imagens/foto-perfil.jpg" alt="Foto do usuário" />
+      <span>Usuário: Danilo Martins</span>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <a href="1_dashboard.html">Início</a>
+    <a href="#" class="active">Estoque</a>
+    <a href="3_cadastrarProduto.html">Cadastrar Produto</a>
+    <a href="4_cadastrarEntradas.html">Cadastrar Entradas</a>
+    <a href="5_cadastrarSaidas.html">Cadastrar Saídas</a>
+    <a href="9_relatorios.html">Relatórios</a>
+    <a href="6_avisos.html">Avisos</a>
+    <a href="7_configuracoes.html">Configurações</a>
+    <a href="8_ajuda.html">Ajuda</a>
+  </nav>
+
+  <main class="main-content">
+    <section class="content-section">
+      <h2>Estoque Atual</h2>
+
+      <div class="filtros">
+        <div class="filtro-texto">
+          <input type="text" id="busca" placeholder="Buscar por nome" style="height: 38px;"/>
+          <ul id="autocompleteList"></ul>
+        </div>
+
+        <select id="filtroCategoria" style="width: 200px;"></select>
+
+        <input type="date" id="filtro-data"/>
+      </div>
+
+      <div class="table-container">
+        <table id="tabela-produtos" class="tabela-padrao">
+          <thead>
+            <tr>
+              <th data-coluna="id">ID</th>
+              <th data-coluna="nome">Nome</th>
+              <th data-coluna="categoria">Categoria</th>
+              <th data-coluna="quantidade_inicial">Quantidade</th>
+              <th data-coluna="ultima_alteracao">Última Alteração</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Conteúdo dinâmico JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  
+  <!-- MODAL DE EDIÇÃO -->
+  <div id="modal-editar" class="modal" style="display: none;">
+    <form id="form-editar" class="modal-conteudo">
+      <input type="hidden" id="editar-id">
+
+      <label for="editar-nome">Nome:</label>
+      <input type="text" id="editar-nome" required>
+
+      <label for="editar-categoria">Categoria:</label>
+      <select id="editar-categoria" required></select>
+
+      <div class="modal-botoes">
+        <button type="submit">Salvar</button>
+        <button type="button" onclick="fecharModal()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO --> 
+  <div id="modal-confirmar-exclusao" class="modal" style="display: none;">
+    <form class="modal-conteudo">
+      <p style="margin-bottom: 1rem;">Tem certeza que deseja excluir este produto?</p>
+      
+      <div class="modal-botoes">
+        <button type="button" id="btn-confirmar-exclusao">Confirmar</button>
+        <button type="button" onclick="fecharModalConfirmacao()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

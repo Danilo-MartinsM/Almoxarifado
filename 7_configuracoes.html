@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configurações - naturAYO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="shortcut icon" href="imagens/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo-area">
+        <img src="imagens/logo1.png" alt="Logo naturAYO">
+        <h1>naturAYO</h1>
+      </div>
+    <div class="user-info">
+      <img src="imagens/foto-perfil.jpg" alt="Foto do usuário">
+      <span>Usuário: Danilo Martins</span>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <a href="1_dashboard.html">Início</a>
+    <a href="2_estoque.html">Estoque</a>
+    <a href="3_cadastrarProduto.html">Cadastrar Produto</a>
+    <a href="4_cadastrarEntradas.html">Cadastrar Entradas</a>
+    <a href="5_cadastrarSaidas.html">Cadastrar Saídas</a>
+    <a href="9_relatorios.html">Relatórios</a>
+    <a href="6_avisos.html">Avisos</a>
+    <a href="#" class="active">Configurações</a>
+    <a href="8_ajuda.html">Ajuda</a>
+  </nav>
+
+  <main class="main-content">
+    <section class="content-section">
+      <h2>Configurações</h2>
+      <form>
+        <div class="form-group">
+          <label for="nomeSistema">Nome de Usuário</label>
+          <input type="text" id="nomeSistema" name="nomeSistema" value="Danilo Martins" required>
+        </div>
+
+        <div class="form-group">
+          <label for="temaSistema">Tema</label>
+          <select id="temaSistema" name="temaSistema" required>
+            <option value="claro">Claro</option>
+            <option value="escuro">Escuro</option>
+          </select>
+        </div>
+        <h3>Alterar Senha</h3>
+        <div class="form-group">
+          <label for="senhaAtual">Senha Atual</label>
+          <input type="password" id="senhaAtual" name="senhaAtual" required>
+        </div>
+
+        <div class="form-group">
+          <label for="novaSenha">Nova Senha</label>
+          <input type="password" id="novaSenha" name="novaSenha" required>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmarSenha">Confirmar Nova Senha</label>
+          <input type="password" id="confirmarSenha" name="confirmarSenha" required>
+        </div>
+
+        <button type="submit">Salvar Configurações</button>
+      </form>
+      <h3>Logout</h3>
+      <button onclick="window.location.href='index.html'">Sair</button>
+    </section>
+  </main>
+</body>
+</html>

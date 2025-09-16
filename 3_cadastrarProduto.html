@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastrar Produto - naturAYO</title>
+  <link rel="shortcut icon" href="imagens/favicon.ico" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- jQuery (requerido para Select2) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <!-- Select2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="logo-area">
+      <img src="imagens/logo1.png" alt="Logo naturAYO" />
+      <h1>naturAYO</h1>
+    </div>
+    <div class="user-info">
+      <img src="imagens/foto-perfil.jpg" alt="Foto do usuário" />
+      <span>Usuário: Danilo Martins</span>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <a href="1_dashboard.html">Início</a>
+    <a href="2_estoque.html">Estoque</a>
+    <a href="#" class="active">Cadastrar Produto</a>
+    <a href="4_cadastrarEntradas.html">Cadastrar Entradas</a>
+    <a href="5_cadastrarSaidas.html">Cadastrar Saídas</a>
+    <a href="9_relatorios.html">Relatórios</a>
+    <a href="6_avisos.html">Avisos</a>
+    <a href="7_configuracoes.html">Configurações</a>
+    <a href="8_ajuda.html">Ajuda</a>
+  </nav>
+
+  <main class="main-content">
+    <section class="content-section">
+      <h2>Cadastrar Produto</h2>
+      <form id="form-cadastro">
+        <div class="form-group">
+          <label for="nomeProduto">Nome do Produto</label>
+          <input type="text" id="nomeProduto" name="nomeProduto" required />
+        </div>
+
+        <div class="form-group">
+          <label for="categoriaProduto">Categoria</label>
+          <select id="categoriaProduto" name="categoriaProduto" required style="width: 200px;"></select>
+        </div>
+
+        <div class="form-group">
+          <label for="dataAlteracao">Data de Entrada</label>
+          <input type="datetime-local" id="dataAlteracao" name="dataAlteracao" required />
+        </div>
+
+        <div class="form-group">
+          <label for="quantidadeInicial">Quantidade Inicial</label>
+          <input type="number" id="quantidadeInicial" name="quantidadeInicial" min="0" step="1" value="0" required />
+        </div>
+
+        <button type="submit">Cadastrar Produto</button>
+      </form>
+    </section>
+  </main>
+
+  <div id="toast-container"></div>
+  <script src="script.js"></script>
+</body>
+</html>

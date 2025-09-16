@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastrar Saídas - naturAYO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet' />
+  <link rel="shortcut icon" href="imagens/favicon.ico" type="image/x-icon">
+  <!-- jQuery (requerido para Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo-area">
+        <img src="imagens/logo1.png" alt="Logo naturAYO">
+        <h1>naturAYO</h1>
+      </div>
+    <div class="user-info">
+      <img src="imagens/foto-perfil.jpg" alt="Foto do usuário">
+      <span>Usuário: Danilo Martins</span>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <a href="1_dashboard.html">Início</a>
+    <a href="2_estoque.html">Estoque</a>
+    <a href="3_cadastrarProduto.html">Cadastrar Produto</a>
+    <a href="4_cadastrarEntradas.html">Cadastrar Entradas</a>
+    <a href="#" class="active">Cadastrar Saídas</a>
+    <a href="9_relatorios.html">Relatórios</a>
+    <a href="6_avisos.html">Avisos</a>
+    <a href="7_configuracoes.html">Configurações</a>
+    <a href="8_ajuda.html">Ajuda</a>
+  </nav>
+
+  <main class="main-content">
+    <section class="content-section">
+      <h2>Cadastrar Saídas</h2>
+      <form>
+        <div class="filter-group">
+          <label for="filtroProdutoSaida">Produto</label>
+          <select id="filtroProdutoSaida" style="width: 100%;"></select>
+        </div>
+
+        <div class="form-group">
+          <label for="quantidadeSaida">Quantidade</label>
+          <input type="number" id="quantidadeSaida" name="quantidadeSaida" min="0" step="1" required>
+        </div>
+
+        <div class="form-group">
+          <label for="dataAlteracao">Data de Entrada</label>
+          <input type="datetime-local" id="dataSaida" name="dataSaida" required style="width: 200px;"/>
+        </div>
+
+        <button type="submit">Registrar Saída</button>
+      </form>
+    </section>
+  </main>
+
+  <div id="toast-container"></div>
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="script.js"></script>
+</body>
+</html>

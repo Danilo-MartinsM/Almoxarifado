@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avisos - naturAYO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet' />
+  <link rel="shortcut icon" href="imagens/favicon.ico" type="image/x-icon">
+  <!-- jQuery (requerido para Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo-area">
+        <img src="imagens/logo1.png" alt="Logo naturAYO">
+        <h1>naturAYO</h1>
+      </div>
+    <div class="user-info">
+      <img src="imagens/foto-perfil.jpg" alt="Foto do usuário">
+      <span>Usuário: Danilo Martins</span>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <a href="1_dashboard.html">Início</a>
+    <a href="2_estoque.html">Estoque</a>
+    <a href="3_cadastrarProduto.html">Cadastrar Produto</a>
+    <a href="4_cadastrarEntradas.html">Cadastrar Entradas</a>
+    <a href="5_cadastrarSaidas.html">Cadastrar Saídas</a>
+    <a href="#"  class="active">Relatórios</a>
+    <a href="6_avisos.html">Avisos</a>
+    <a href="7_configuracoes.html">Configurações</a>
+    <a href="8_ajuda.html">Ajuda</a>
+  </nav>
+  
+  <main class="main-content">
+    <section class="content-section">
+      <h1>Relatórios</h1>
+      <form>
+        <div class="filtros">
+          <div class="filtro-texto">
+            <input type="text" id="busca" placeholder="Buscar por nome" oninput="carregarProdutos()" style="height: 38px;"/>
+
+          </div>
+          <div class="form-group">
+            <select id="filtroProduto" name="id_produto" style="width: 100%; height: 38px;" placeholder="Produto"></select>
+          </div>
+          <div class="form-group">
+            <input type="week" id="filtroData" name="data" style="height: 38px;"/>
+          </div>
+        </div>
+        <table id="tabela-movimentacoes" class="tabela-padrao">
+          <thead>
+            <h2>Movimentações</h2>
+            <tr>
+              <th data-coluna="nome">Produto</th>
+              <th data-coluna="categoria">Complexo</th>
+              <th data-coluna="ultima_alteracao">Colaborador</th>
+              <th data-coluna="quantidade_inicial">Quantidade</th>
+              <th data-coluna="ultima_alteracao">Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Conteúdo dinâmico JS -->
+          </tbody>
+        </table>
+
+
+
+
+      </form>
+  <!-- Scripts -->
+  <!-- Substitua esse kit FontAwesome se estiver dando erro de CORS -->
+  <!-- <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+  <script src="script.js" defer></script>
+</body>
+</html>

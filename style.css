@@ -1,0 +1,713 @@
+/*============================
+  VARIÁVEIS E CONFIGURAÇÕES GLOBAIS
+============================*/
+:root {
+  --bg: #f4f4f4;
+  --sidebar: #333;
+  --sidebar-hover: #555;
+  --header: #ffffff;
+  --white: #fff;
+  --text: #2d3d3f;
+  --accent: #333;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+/*============================
+  CABEÇALHO (HEADER)
+============================*/
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-left: 240px;
+}
+
+header h1 {
+  font-size: 1.5rem;
+  color: var(--accent);
+}
+
+/*============================
+  BARRA LATERAL (SIDEBAR)
+============================*/
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  background-color: var(--sidebar);
+  padding-top: 5rem;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar a {
+  display: block;
+  padding: 1rem 2rem;
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background-color: var(--sidebar-hover);
+}
+
+.sidebar a.active {
+  font-weight: 600;
+  border-left: 4px solid var(--white);
+  padding-left: calc(2rem - 4px);
+}
+
+/*============================
+  CONTEÚDO PRINCIPAL
+============================*/
+.main-content {
+  margin-left: 240px;
+  padding: 2rem;
+  display: flex;
+  gap: 2rem;
+}
+
+.content-section,
+.calendar {
+  background-color: var(--white);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.content-section {
+  flex: 2;
+}
+
+.calendar {
+  flex: 1;
+  min-width: 300px;
+}
+
+.calendar h3 {
+  margin: 0 0 1rem;
+  text-align: center;
+  color: var(--accent);
+}
+
+/*============================
+  TÍTULOS
+============================*/
+h2 {
+  margin-bottom: 1rem;
+}
+
+h3 {
+  margin: 1rem 0;
+}
+
+.current-date h2 {
+  margin-bottom: 1.5rem;
+  color: var(--accent);
+  font-size: 1.2rem;
+}
+
+/*============================
+  FORMULÁRIOS
+============================*/
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.8rem;
+  margin-top: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+/*============================
+  BOTÕES
+============================*/
+button {
+  background-color: var(--accent);
+  color: var(--white);
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #006f6f;
+}
+
+/*============================
+  ITENS DE PRODUTO
+============================*/
+.product-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: var(--white);
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.product-item:hover {
+  transform: translateY(-2px);
+}
+
+.product-icon {
+  font-size: 2rem;
+  color: var(--accent);
+}
+
+/*============================
+  TABELAS
+============================*/
+.table-container {
+  margin-top: 2rem;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: var(--sidebar);
+  color: var(--white);
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}
+
+/*============================
+  LOGO E INFORMAÇÕES DO USUÁRIO
+============================*/
+.logo-area,
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo-area img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.user-info img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+/*============================
+  AUTOCOMPLETO DA PESQUISA
+============================*/
+#autocompleteList li {
+  transition: background-color 0.2s ease, padding-left 0.2s ease;
+}
+
+#autocompleteList li:hover {
+  background-color: #f0f0f0;
+  color: #008080;
+}
+
+/*============================
+  FILTROS DE CALENDÁRIO
+============================*/
+.filter-group {
+  margin-bottom: 1rem;
+}
+
+.filter-group label {
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.3rem;
+  color: var(--text);
+}
+
+/*============================
+  ESTILO PARA FULLCALENDAR
+============================*/
+#calendar {
+  max-width: 100%;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 1.25rem;
+  color: var(--accent);
+}
+
+.fc .fc-button {
+  background-color: var(--accent);
+  border: none;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--white);
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.fc .fc-button:hover {
+  background-color: var(--sidebar-hover);
+}
+
+.fc .fc-daygrid-event {
+  background-color: var(--sidebar);
+  border: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: var(--white);
+  font-size: 0.75rem;
+}
+
+.fc-day-selected {
+  background-color: #12f395 !important;
+  color: white !important;
+}
+
+/*============================
+  FILTROS (BARRA SUPERIOR)
+============================*/
+.filtros {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.filtro-texto {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.filtro-texto input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+input[type="date"], input[type="week"]{
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+input[type="number"] {
+  width: 200px;;
+}
+
+#autocompleteList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 150px;
+  overflow-y: auto;
+  display: none;
+  z-index: 10;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-radius: 0 0 4px 4px;
+}
+
+/*============================
+  TABELA PADRÃO - AÇÕES E ESTILO GERAL
+============================*/
+
+table.tabela-padrao td button {
+  padding: 0.3rem 0.6rem;
+  margin: 0 0.2rem;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.2s ease;
+}
+
+table.tabela-padrao td button:first-child {
+  background-color: #3498db;
+  color: white;
+}
+
+table.tabela-padrao td button:first-child:hover {
+  background-color: #2980b9;
+}
+
+table.tabela-padrao td button:last-child {
+  background-color: #c0392b;
+  color: white;
+}
+
+table.tabela-padrao td button:last-child:hover {
+  background-color: #922b21;
+}
+
+/* Estilo para coluna de ações (ou qualquer quinta coluna) */
+table.tabela-padrao td:nth-child(5) {
+  white-space: nowrap;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Estilo das células */
+table.tabela-padrao td {
+  padding: 0.6rem 0.8rem;
+}
+
+/* Estilo do cabeçalho */
+table.tabela-padrao thead th {
+  padding: 0.8rem;
+  text-align: left;
+  border-bottom: 2px solid #ccc;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+}
+
+
+/*============================
+  MODAL
+============================*/
+.modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.modal-conteudo {
+  background-color: var(--white);
+  padding: 2rem 2.5rem;
+  border-radius: 12px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+}
+
+.modal-conteudo label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--accent);
+  font-size: 1rem;
+}
+
+.modal-conteudo input[type="text"] {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1.8px solid #b0b0b0;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 1.3rem;
+  transition: border-color 0.3s;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+}
+
+.modal-conteudo input[type="text"]:focus,
+.modal-conteudo select:focus {
+  border-color: #008080;
+  outline: none;
+}
+
+#dataAlteracao,
+#quantidadeInicial {
+  width: 200px;
+}
+
+.modal-botoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.modal-botoes button {
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.6rem 1.3rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.modal-botoes button[type="submit"] {
+  background-color: #008080;
+  color: white;
+}
+
+.modal-botoes button[type="submit"]:hover {
+  background-color: #006666;
+}
+
+.modal-botoes button[type="button"] {
+  background-color: #ccc;
+  color: #333;
+}
+
+.modal-botoes button[type="button"]:hover {
+  background-color: #bbb;
+}
+
+#editar-id {
+  display: none;
+}
+
+/*============================
+  MENSAGENS DE RETORNO
+============================*/
+#mensagem {
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+#mensagem.erro {
+  color: red;
+}
+
+#mensagem.sucesso {
+  color: green;
+}
+
+#data-atual {
+  margin-bottom: 10px !important;
+  font-weight: 600 !important;
+}
+
+/*============================
+  SELECT2 CORRIGIDO
+============================*/
+.select2-container--default .select2-selection--single {
+  height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 12px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  background-color: white !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px !important;
+  color: #333 !important;
+  box-sizing: border-box !important;
+}
+
+/* Corrige a borda ao focar */
+.select2-container--default.select2-container--focus .select2-selection--single {
+  border-color: #008080 !important;
+  box-shadow: none !important;
+}
+
+/* Corrige a seta */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+  height: 38px !important;
+  top: 0 !important;
+  right: 6px !important;
+}
+
+/* Lista de opções */
+.select2-container--default .select2-results > .select2-results__options {
+  max-height: 200px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+}
+
+/* Estilo das opções */
+.select2-container--default .select2-results__option {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+/* Hover na opção */
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background-color: #008080;
+  color: white;
+}
+
+
+/*============================
+  TOAST CONTAINER
+============================*/
+#toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 300px;
+}
+
+.toast {
+  padding: 12px 20px;
+  border-radius: 5px;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateX(100%);
+  animation: slideIn 0.3s forwards
+}
+
+.toast.success {
+  background-color: #28a745;
+}
+
+.toast.error {
+  background-color: #dc3545;
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+
+
+/*============================
+  SELECT PADRÃO
+============================*/
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background-color: var(--white);
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  box-sizing: border-box;
+  background-image: url("data:image/svg+xml,%3Csvg fill='%23008080' height='16' viewBox='0 0 20 20' width='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+select:focus {
+  border-color: #008080;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.3);
+}
+
+select:disabled {
+  background-color: #f0f0f0;
+  color: #999;
+  cursor: not-allowed;
+}
+
+
+/* ============================
+   BOTÕES DE AÇÃO GENÉRICOS (EDITAR / EXCLUIR)
+============================ */
+.btn-editar {
+  background-color: #3498db;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  margin: 0 0.2rem;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.2s ease;
+}
+
+.btn-editar:hover {
+  background-color: #2980b9;
+}
+
+.btn-excluir {
+  background-color: #c0392b;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  margin: 0 0.2rem;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.2s ease;
+}
+
+.btn-excluir:hover {
+  background-color: #922b21;
+}
+
+
+
+

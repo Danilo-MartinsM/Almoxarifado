@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avisos - naturAYO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet' />
+  <link rel="shortcut icon" href="imagens/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo-area">
+        <img src="imagens/logo1.png" alt="Logo naturAYO">
+        <h1>naturAYO</h1>
+      </div>
+    <div class="user-info">
+      <img src="imagens/foto-perfil.jpg" alt="Foto do usuário">
+      <span>Usuário: Danilo Martins</span>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <a href="1_dashboard.html">Início</a>
+    <a href="2_estoque.html">Estoque</a>
+    <a href="3_cadastrarProduto.html">Cadastrar Produto</a>
+    <a href="4_cadastrarEntradas.html">Cadastrar Entradas</a>
+    <a href="5_cadastrarSaidas.html">Cadastrar Saídas</a>
+    <a href="9_relatorios.html">Relatórios</a>
+    <a href="#" class="active">Avisos</a>
+    <a href="7_configuracoes.html">Configurações</a>
+    <a href="8_ajuda.html">Ajuda</a>
+  </nav>
+  
+  <main class="main-content">
+    <section class="content-section">
+      <h2>Avisos</h2>  
+      
+      <!-- Botão de novo relatório -->
+      <div style="margin-bottom: 20px; padding-top: 10px;">
+        <button id="btn-novo-relatorio" type="button">
+          + Novo
+        </button>
+      </div>
+      <!-- Filtros -->
+      <div class="filtros">
+        <div class="filtro-texto">
+          <input type="text" id="busca-relatorio" placeholder="Buscar por título" oninput="filtrarRelatorios()" style="height: 38px;"/>
+        </div>
+        <input type="date" id="filtro-lembrete" onchange="filtrarRelatorios()" />
+      </div>
+      
+      
+
+      <!-- Tabela de relatórios -->
+      <div class="table-container">
+        <table id="tabela-relatorios" class="tabela-padrao">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Título</th>
+              <th>Conteúdo</th>
+              <th>Criado em</th>
+              <th>Lembrete</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  
+
+ <!-- Modal criar e editar aviso -->
+<div id="modal-novo-relatorio" class="modal" style="display:none;">
+  <form id="form-novo-relatorio" class="modal-conteudo">
+    <h3>Novo Aviso</h3>
+
+    <label for="novo-titulo">Título:</label>
+    <input type="text" id="novo-titulo" required>
+
+    <label for="novo-descricao">Descrição:</label>
+    <textarea id="novo-descricao" rows="15" style="width: 100%; resize: none;" required></textarea>
+
+    <label for="novo-lembrete">Lembrete (opcional):</label>
+    <input type="date" id="novo-lembrete">
+
+    <div class="modal-botoes">
+      <button type="submit">Salvar</button>
+      <button type="button" onclick="fecharModalNovoRelatorio()">Cancelar</button>
+    </div>
+  </form>
+</div>
+<div id="toast-container"></div>
+
+
+  <!-- Scripts -->
+  <!-- Substitua esse kit FontAwesome se estiver dando erro de CORS -->
+  <!-- <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+  <script src="script.js" defer></script>
+</body>
+</html>
