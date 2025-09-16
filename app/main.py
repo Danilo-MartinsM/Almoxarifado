@@ -23,7 +23,7 @@ def criar_produto(produto: Produto):
 
     try:
         cursor.execute(
-            "INSERT INTO produtos (nome, categoria, quantidade) VALUES (%s, %s, %s)",
+            "INSERT INTO produtos (nome, categoria, quantidade) VALUES (Upper(%s), %s, %s)",
             (produto.nome, produto.categoria, produto.quantidade)
         )
         conn.commit()
