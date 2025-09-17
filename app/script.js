@@ -4,12 +4,12 @@
 
 // 🔹 Executa quando o DOM estiver carregado
 document.addEventListener("DOMContentLoaded", () => {
-    // Carrega os filtros e movimentações
+    // Inicializa filtros, movimentações e calendar
     carregarFiltros();
     carregarMovimentacoes();
     inicializarCalendar();
 
-    // Adiciona listeners aos selects para filtrar movimentações
+    // Atualizar movimentações quando mudar filtros
     document.getElementById("filtroProduto").addEventListener("change", carregarMovimentacoes);
     document.getElementById("filtroCategoria").addEventListener("change", carregarMovimentacoes);
 });
@@ -24,6 +24,7 @@ async function carregarMovimentacoes() {
 
         // Requisição GET para API de movimentações
         const response = await fetch("http://localhost:8001/movimentacoes");
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
 
         const container = document.querySelector(".movimentacao-list");
@@ -36,15 +37,16 @@ async function carregarMovimentacoes() {
             movimentacoes = movimentacoes.filter(m => m.produto === produtoFiltro);
         }
         if (categoriaFiltro) {
+            // Categoria vem do backend como p.categoria
             movimentacoes = movimentacoes.filter(m => m.categoria === categoriaFiltro);
         }
 
+        // Exibe movimentações (sem mostrar a categoria)
         movimentacoes.forEach(mov => {
             const divMov = document.createElement("div");
             divMov.classList.add("movimentacao-item");
             divMov.innerHTML = `
                 <strong>Produto:</strong> ${mov.produto} <br/>
-                <strong>Categoria:</strong> ${mov.categoria || "-"} <br/>
                 <strong>Tipo:</strong> ${mov.tipo} <br/>
                 <strong>Quantidade:</strong> ${mov.quantidade} <br/>
                 <strong>Data:</strong> ${new Date(mov.data_alteracao).toLocaleString()}
@@ -63,27 +65,34 @@ async function carregarMovimentacoes() {
 }
 
 // ============================
-// FUNÇÃO: Popular filtros de Produto e Categoria
+// FUNÇÃO: Carregar filtros de produto e categoria
 // ============================
 async function carregarFiltros() {
     try {
-        // Produtos
-        const resProdutos = await fetch("http://localhost:8001/produtos");
-        const dataProdutos = await resProdutos.json();
+        const response = await fetch("http://localhost:8001/produtos");
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+
+        // ===== Filtro de Produto =====
         const selectProduto = document.getElementById("filtroProduto");
-        selectProduto.innerHTML = `<option value="">Todos</option>`;
-        dataProdutos.produtos.forEach(p => {
-            selectProduto.innerHTML += `<option value="${p.nome}">${p.nome}</option>`;
+        selectProduto.innerHTML = '<option value="">Todos</option>';
+        data.produtos.forEach(p => {
+            const option = document.createElement("option");
+            option.value = p.nome;
+            option.textContent = p.nome;
+            selectProduto.appendChild(option);
         });
-        // Inicializa Select2
         $("#filtroProduto").select2({ width: 'resolve' });
 
-        // Categorias
-        const categorias = [...new Set(dataProdutos.produtos.map(p => p.categoria))];
+        // ===== Filtro de Categoria =====
+        const categorias = [...new Set(data.produtos.map(p => p.categoria))];
         const selectCategoria = document.getElementById("filtroCategoria");
-        selectCategoria.innerHTML = `<option value="">Todas</option>`;
+        selectCategoria.innerHTML = '<option value="">Todas</option>';
         categorias.forEach(c => {
-            selectCategoria.innerHTML += `<option value="${c}">${c}</option>`;
+            const option = document.createElement("option");
+            option.value = c;
+            option.textContent = c;
+            selectCategoria.appendChild(option);
         });
         $("#filtroCategoria").select2({ width: 'resolve' });
 
@@ -102,7 +111,7 @@ function inicializarCalendar() {
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'pt-br',
-        weekNumbers: true,           // MOSTRA O NÚMERO DA SEMANA
+        weekNumbers: true, // MOSTRA O NÚMERO DA SEMANA
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
@@ -122,9 +131,17 @@ function mostrarToast(mensagem, tipo) {
     const toast = document.createElement("div");
     toast.className = `toast ${tipo}`;
     toast.innerText = mensagem;
+
     container.appendChild(toast);
 
+    // Animação de entrada
+    requestAnimationFrame(() => {
+        toast.style.animation = 'slideIn 0.3s forwards';
+    });
+
+    // Remove o toast com fadeOut após 3s
     setTimeout(() => {
-        toast.remove();
+        toast.style.animation = 'fadeOut 0.3s forwards';
+        toast.addEventListener('animationend', () => toast.remove());
     }, 3000);
 }

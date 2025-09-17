@@ -3,8 +3,26 @@ from pydantic import BaseModel
 from typing import Literal
 import bcrypt
 from database import get_connection
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+    "http://127.0.0.1",
+    "http://127.0.0.1:5500",  # se usar Live Server do VSCode
+    "*",  # opcional para liberar todos
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 class Produto(BaseModel):
     nome: str
@@ -49,6 +67,25 @@ def listar_produtos():
     finally:
         cursor.close()
         conn.close()
+
+@app.get("/categorias")
+def listar_categorias():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("SELECT DISTINCT categoria FROM produtos")
+        categorias = cursor.fetchall()
+        # Ajusta formato para o frontend
+        categorias = [{"nome": c["categoria"]} for c in categorias]
+        return {"categorias": categorias}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+
+
 
 @app.post("/movimentacoes")
 def criar_movimentacao(mov: Movimentacao):
@@ -102,7 +139,13 @@ def listar_movimentacoes():
 
     try:
         cursor.execute("""
-            SELECT m.id, p.nome AS produto, m.tipo, m.quantidade, m.data_alteracao
+            SELECT 
+                m.id, 
+                p.nome AS produto, 
+                p.categoria AS categoria,  -- pega direto da tabela produtos
+                m.tipo, 
+                m.quantidade, 
+                m.data_alteracao
             FROM movimentacoes m
             JOIN produtos p ON m.id_produto = p.id
             ORDER BY m.data_alteracao DESC
@@ -114,3 +157,5 @@ def listar_movimentacoes():
     finally:
         cursor.close()
         conn.close()
+
+
