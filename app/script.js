@@ -42,7 +42,7 @@ async function carregarMovimentacoes() {
         // Exibe movimentações no estilo .product-item
         movimentacoes.forEach(mov => {
             const divMov = document.createElement("div");
-            divMov.classList.add("product-item"); // aplica CSS já existente
+            divMov.classList.add("product-item");
 
             // Escolhe ícone baseado no tipo de movimentação
             const icon = mov.tipo === "Entrada" ? "📥" : "📦";
