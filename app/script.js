@@ -32,24 +32,29 @@ async function carregarMovimentacoes() {
 
         // Filtra movimentações pelo produto e categoria selecionados
         let movimentacoes = data.movimentacoes;
-
         if (produtoFiltro) {
             movimentacoes = movimentacoes.filter(m => m.produto === produtoFiltro);
         }
         if (categoriaFiltro) {
-            // Categoria vem do backend como p.categoria
             movimentacoes = movimentacoes.filter(m => m.categoria === categoriaFiltro);
         }
 
-        // Exibe movimentações (sem mostrar a categoria)
+        // Exibe movimentações no estilo .product-item
         movimentacoes.forEach(mov => {
             const divMov = document.createElement("div");
-            divMov.classList.add("movimentacao-item");
+            divMov.classList.add("product-item"); // aplica CSS já existente
+
+            // Escolhe ícone baseado no tipo de movimentação
+            const icon = mov.tipo === "Entrada" ? "📥" : "📦";
+
             divMov.innerHTML = `
-                <strong>Produto:</strong> ${mov.produto} <br/>
-                <strong>Tipo:</strong> ${mov.tipo} <br/>
-                <strong>Quantidade:</strong> ${mov.quantidade} <br/>
-                <strong>Data:</strong> ${new Date(mov.data_alteracao).toLocaleString()}
+                <div class="product-icon">${icon}</div>
+                <div>
+                    <strong>${mov.produto}</strong><br/>
+                    <small>Tipo: ${mov.tipo}</small><br/>
+                    <small>Quantidade: ${mov.quantidade}</small><br/>
+                    <small>Data: ${new Date(mov.data_alteracao).toLocaleString()}</small>
+                </div>
             `;
             container.appendChild(divMov);
         });
@@ -63,6 +68,7 @@ async function carregarMovimentacoes() {
         mostrarToast("Erro ao carregar movimentações!", "erro");
     }
 }
+
 
 // ============================
 // FUNÇÃO: Carregar filtros de produto e categoria
