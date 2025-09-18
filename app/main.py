@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Literal
-import bcrypt
+from typing import Literal, Optional
 from database import get_connection
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
 
 app = FastAPI()
 
@@ -11,8 +11,8 @@ origins = [
     "http://localhost",
     "http://localhost:8000",
     "http://127.0.0.1",
-    "http://127.0.0.1:5500",  # se usar Live Server do VSCode
-    "*",  # opcional para liberar todos
+    "http://127.0.0.1:5500",
+    "*",
 ]
 
 app.add_middleware(
@@ -23,29 +23,103 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+# ============================
+# MODELOS
+# ============================
 class Produto(BaseModel):
     nome: str
     categoria: Literal['Insumos', 'Vasos', 'Caixas', 'Porta Vaso', 'Fita Cetim', 'Liga Elástica', 'Etiquetas']
     quantidade: int = 0
+    dataAlteracao: Optional[datetime] = None  # agora podemos enviar data
 
 class Movimentacao(BaseModel):
     id_produto: int
     tipo: Literal['Entrada', 'Saída']
     quantidade: int
+    data_alteracao: Optional[datetime] = None
 
+from datetime import datetime, timedelta
+
+# Função auxiliar para hora de Brasília
+def hora_brasilia():
+    return datetime.utcnow() - timedelta(hours=3)
+
+# ============================
+# FUNÇÃO AUXILIAR: criar movimentação
+# ============================
+def criar_movimentacao(mov: Movimentacao, conn=None):
+    close_conn = False
+    if conn is None:
+        conn = get_connection()
+        close_conn = True
+    cursor = conn.cursor()
+    try:
+        # verifica se produto existe
+        cursor.execute("SELECT quantidade FROM produtos WHERE id=%s", (mov.id_produto,))
+        produto = cursor.fetchone()
+        if not produto:
+            raise HTTPException(status_code=404, detail="Produto não encontrado")
+
+        # calcula nova quantidade
+        quantidade_atual = produto[0]
+        if mov.tipo == "Entrada":
+            nova_quantidade = quantidade_atual + mov.quantidade
+        else:
+            nova_quantidade = quantidade_atual - mov.quantidade
+            if nova_quantidade < 0:
+                raise HTTPException(status_code=400, detail="Quantidade insuficiente em estoque")
+
+        # atualiza quantidade no produto
+        cursor.execute(
+            "UPDATE produtos SET quantidade=%s WHERE id=%s",
+            (nova_quantidade, mov.id_produto)
+        )
+
+        # insere movimentação com data/hora do frontend ou datetime.now()
+        data = mov.data_alteracao or datetime.now()
+        cursor.execute(
+            "INSERT INTO movimentacoes (id_produto, tipo, quantidade, data_alteracao) VALUES (%s, %s, %s, %s)",
+            (mov.id_produto, mov.tipo, mov.quantidade, data)
+        )
+
+        conn.commit()
+        return {"mensagem": "Movimentação registrada com sucesso!"}
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        if close_conn:
+            conn.close()
+
+# ============================
+# ENDPOINT: Criar produto
+# ============================
 @app.post("/produtos")
 def criar_produto(produto: Produto):
     conn = get_connection()
     cursor = conn.cursor()
-
     try:
+        # insere produto
         cursor.execute(
-            "INSERT INTO produtos (nome, categoria, quantidade) VALUES (Upper(%s), %s, %s)",
+            "INSERT INTO produtos (nome, categoria, quantidade) VALUES (UPPER(%s), %s, %s)",
             (produto.nome, produto.categoria, produto.quantidade)
         )
         conn.commit()
-        return {"mensagem": "Produto criado com sucesso!"}
+        id_produto = cursor.lastrowid
+
+        # registra movimentação de entrada
+        mov = Movimentacao(
+            id_produto=id_produto,
+            tipo="Entrada",
+            quantidade=produto.quantidade,
+            data_alteracao=produto.dataAlteracao  # se None, será datetime.now() na função
+        )
+        criar_movimentacao(mov, conn)
+
+        return {"mensagem": "Produto criado e movimentação registrada com sucesso!"}
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
@@ -53,11 +127,15 @@ def criar_produto(produto: Produto):
         cursor.close()
         conn.close()
 
+
+
+# ============================
+# ENDPOINTS DE LISTAGEM
+# ============================
 @app.get("/produtos")
 def listar_produtos():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-
     try:
         cursor.execute("SELECT * FROM produtos")
         produtos = cursor.fetchall()
@@ -72,7 +150,6 @@ def listar_produtos():
 def listar_categorias():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-
     try:
         cursor.execute("SELECT id, nome FROM categorias ORDER BY nome")
         categorias = cursor.fetchall()
@@ -83,63 +160,23 @@ def listar_categorias():
         cursor.close()
         conn.close()
 
-
+# ============================
+# ENDPOINT: Movimentações
+# ============================
 @app.post("/movimentacoes")
-def criar_movimentacao(mov: Movimentacao):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    try:
-        # Verifica se o produto existe
-        cursor.execute("SELECT quantidade FROM produtos WHERE id=%s", (mov.id_produto,))
-        produto = cursor.fetchone()
-        if not produto:
-            raise HTTPException(status_code=404, detail="Produto não encontrado")
-
-        # Calcula nova quantidade
-        quantidade_atual = produto[0]
-        if mov.tipo == 'Entrada':
-            nova_quantidade = quantidade_atual + mov.quantidade
-        else:  # Saída
-            nova_quantidade = quantidade_atual - mov.quantidade
-            if nova_quantidade < 0:
-                raise HTTPException(status_code=400, detail="Quantidade insuficiente em estoque")
-
-        # Atualiza quantidade no produto
-        cursor.execute(
-            "UPDATE produtos SET quantidade=%s WHERE id=%s",
-            (nova_quantidade, mov.id_produto)
-        )
-
-        # Insere a movimentação
-        cursor.execute(
-            "INSERT INTO movimentacoes (id_produto, tipo, quantidade) VALUES (%s, %s, %s)",
-            (mov.id_produto, mov.tipo, mov.quantidade)
-        )
-
-        conn.commit()
-        return {"mensagem": "Movimentação registrada com sucesso!"}
-
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
-    finally:
-        cursor.close()
-        conn.close()
+def criar_movimentacao_endpoint(mov: Movimentacao):
+    return criar_movimentacao(mov)
 
 @app.get("/movimentacoes")
 def listar_movimentacoes():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-
     try:
         cursor.execute("""
             SELECT 
                 m.id, 
                 p.nome AS produto, 
-                p.categoria AS categoria,  -- pega direto da tabela produtos
+                p.categoria AS categoria,
                 m.tipo, 
                 m.quantidade, 
                 m.data_alteracao
@@ -154,4 +191,3 @@ def listar_movimentacoes():
     finally:
         cursor.close()
         conn.close()
-

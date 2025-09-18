@@ -1,5 +1,5 @@
 // ============================
-// script.js - Página Inicial (com toggle do marcador e eventos sempre visíveis)
+// script.js - Página Inicial
 // ============================
 
 // 🔹 Variáveis globais
@@ -25,6 +25,71 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Erro ao inicializar filtros:", err);
             mostrarToast("Erro ao carregar filtros!", "erro");
         });
+});
+
+// ============================
+// FUNÇÃO: Cadastro de Produto
+// ============================
+document.addEventListener("DOMContentLoaded", () => {
+    const formCadastro = document.getElementById("form-cadastro");
+    if (formCadastro) {  // só executa se a página tiver esse formulário
+        formCadastro.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const nome = document.getElementById("nomeProduto").value.trim();
+            const categoria = document.getElementById("categoriaProduto").value;
+            const quantidade = parseInt(document.getElementById("quantidadeInicial").value);
+            const dataAlteracao = document.getElementById("dataAlteracao").value;
+
+            if (!nome || !categoria || isNaN(quantidade)) {
+                mostrarToast("Preencha todos os campos corretamente!", "erro");
+                return;
+            }
+
+            const body = {
+                nome: nome,
+                categoria: categoria,
+                quantidade: quantidade,
+                dataAlteracao: dataAlteracao ? dataAlteracao.replace("T", " ") : undefined
+            };
+
+
+            try {
+                const response = await fetch("http://localhost:8001/produtos", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || "Erro ao cadastrar produto");
+                }
+
+                mostrarToast("Produto cadastrado com sucesso!", "sucesso");
+
+                // Limpa o formulário
+                formCadastro.reset();
+                $("#categoriaProduto").val("").trigger('change');
+
+            } catch (error) {
+                console.error(error);
+                mostrarToast(error.message, "erro");
+            }
+        });
+
+        // Carrega categorias fixas no select
+        const categoriasFixas = ['Insumos', 'Vasos', 'Caixas', 'Porta Vaso', 'Fita Cetim', 'Liga Elástica', 'Etiquetas'];
+        const select = document.getElementById("categoriaProduto");
+        select.innerHTML = '<option value="">Selecione</option>';
+        categoriasFixas.forEach(c => {
+            const option = document.createElement("option");
+            option.value = c;
+            option.textContent = c;
+            select.appendChild(option);
+        });
+        $("#categoriaProduto").select2({ width: 'resolve' });
+    }
 });
 
 // ============================
@@ -147,35 +212,30 @@ function inicializarCalendar() {
         },
         dayMaxEvents: true,
 
-        // 🔹 Clique em um dia (toggle marcador azul)
+        // 🔹 Clique em um dia (toggle fundo do dia)
         dateClick: function(info) {
-            if (dataSelecionada === info.dateStr) {
-                // clicou no mesmo dia → remove marcador
-                calendar.getEvents().forEach(ev => {
-                    if (ev.title === "Selecionado") ev.remove();
-                });
-                dataSelecionada = "";
-            } else {
-                // remove marcador antigo
-                calendar.getEvents().forEach(ev => {
-                    if (ev.title === "Selecionado") ev.remove();
-                });
-                dataSelecionada = info.dateStr;
-                calendar.addEvent({
-                    title: 'Selecionado',
-                    start: dataSelecionada,
-                    allDay: true,
-                    color: 'rgba(0, 123, 255, 0.2)' // azul suave
-                });
+            // Remove fundo antigo, se houver
+            if (dataSelecionada) {
+                const oldCell = calendarEl.querySelector(`[data-date="${dataSelecionada}"]`);
+                if (oldCell) oldCell.classList.remove('dia-selecionado');
             }
 
-            // atualiza lista de movimentações
+            // Toggle da data selecionada
+            if (dataSelecionada === info.dateStr) {
+                dataSelecionada = ""; // desmarca se clicou no mesmo dia
+            } else {
+                dataSelecionada = info.dateStr;
+                info.dayEl.classList.add('dia-selecionado'); // adiciona fundo suave
+            }
+
+            // Atualiza lista de movimentações
             carregarMovimentacoes();
         }
     });
 
     calendar.render();
 }
+
 
 // ============================
 // FUNÇÃO: Atualizar eventos no calendário
