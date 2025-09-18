@@ -1,9 +1,9 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, Body
+from pydantic import BaseModel, validator
 from typing import Literal, Optional
 from database import get_connection
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = FastAPI()
 
@@ -37,8 +37,15 @@ class Movimentacao(BaseModel):
     tipo: Literal['Entrada', 'Saída']
     quantidade: int
     data_alteracao: Optional[datetime] = None
-
-from datetime import datetime, timedelta
+    
+    @validator("data_alteracao", pre=True)
+    def parse_datetime_local(cls, v):
+        if isinstance(v, str):
+            try:
+                return datetime.strptime(v, "%Y-%m-%dT%H:%M")
+            except ValueError:
+                return v
+        return v
 
 # Função auxiliar para hora de Brasília
 def hora_brasilia():
@@ -253,3 +260,14 @@ def listar_movimentacoes():
     finally:
         cursor.close()
         conn.close()
+
+# ============================
+# ENDPOINT: Registrar Entrada
+# ============================
+
+@app.post("/entradas")
+def registrar_entrada(mov: Movimentacao = Body(...)):
+    # força o tipo como Entrada, caso queira ignorar o que vier do frontend
+    mov.tipo = "Entrada"
+    return criar_movimentacao(mov)
+

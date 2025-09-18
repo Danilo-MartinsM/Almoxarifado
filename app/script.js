@@ -472,3 +472,92 @@ function atualizarSetas() {
         th.textContent = ordenacaoAtual.ordem === "asc" ? "▲" : "▼";
     }
 }
+
+
+// ============================
+// FUNÇÕES: Cadastrar Entradas
+// ============================
+document.addEventListener("DOMContentLoaded", () => {
+    const formEntradas = document.getElementById("form-entradas");
+    if (!formEntradas) return;
+
+    // Carregar produtos no Select2
+    const selectProduto = document.getElementById("filtroProduto");
+    if (selectProduto) {
+        selectProduto.innerHTML = '<option value="">Selecione um produto</option>';
+        fetch("http://localhost:8001/produtos")
+            .then(res => res.json())
+            .then(data => {
+                data.produtos.forEach(p => {
+                    const opt = document.createElement("option");
+                    opt.value = p.id;        // ID do produto
+                    opt.textContent = p.nome; // Nome do produto
+                    selectProduto.appendChild(opt);
+                });
+                $("#filtroProduto").select2({
+                    width: 'resolve',
+                    placeholder: "Selecione um produto"
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                mostrarToast("Erro ao carregar produtos!", "erro");
+            });
+    }
+
+    // Preencher data/hora atual
+    const inputData = document.getElementById("dataAlteracao");
+    if (inputData) {
+        const agora = new Date();
+        inputData.value = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,"0")}-${String(agora.getDate()).padStart(2,"0")}T${String(agora.getHours()).padStart(2,"0")}:${String(agora.getMinutes()).padStart(2,"0")}`;
+    }
+
+    // Envio do formulário
+    formEntradas.addEventListener("submit", async e => {
+        e.preventDefault();
+
+        const id_produto = selectProduto.value;
+        const quantidade = document.getElementById("quantidadeEntrada").value;
+        const data_alteracao = inputData.value;
+
+        if (!id_produto || !quantidade) {
+            mostrarToast("Selecione o produto e informe a quantidade!", "erro");
+            return;
+        }
+
+        try {
+            const resp = await fetch("http://localhost:8001/entradas", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id_produto: parseInt(id_produto),
+                    tipo: "Entrada", 
+                    quantidade: parseInt(quantidade),
+                    data_alteracao: data_alteracao ? new Date(data_alteracao).toISOString() : undefined
+                })
+            });
+
+            const result = await resp.json();
+
+            if (resp.ok) {
+                mostrarToast(result.mensagem || "Entrada registrada com sucesso!", "sucesso");
+                formEntradas.reset();
+                $("#filtroProduto").val(null).trigger("change");
+
+                // Atualiza data/hora
+                if (inputData) {
+                    const agora = new Date();
+                    inputData.value = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,"0")}-${String(agora.getDate()).padStart(2,"0")}T${String(agora.getHours()).padStart(2,"0")}:${String(agora.getMinutes()).padStart(2,"0")}`;
+                }
+            } else {
+                mostrarToast(result.detail || "Erro ao registrar entrada", "erro");
+            }
+        } catch (err) {
+            console.error(err);
+            mostrarToast("Erro de conexão com a API", "erro");
+        }
+    });
+});
+
+
+
