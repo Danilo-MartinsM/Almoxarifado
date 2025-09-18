@@ -271,3 +271,10 @@ def registrar_entrada(mov: Movimentacao = Body(...)):
     mov.tipo = "Entrada"
     return criar_movimentacao(mov)
 
+# ============================
+# ENDPOINT: Registrar Sáida
+# ============================
+@app.post("/saidas")
+def registrar_saida(mov: Movimentacao = Body(...)):
+    mov.tipo = "Saída"
+    return criar_movimentacao(mov)

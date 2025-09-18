@@ -395,6 +395,14 @@ function inicializarModaisProdutos() {
             }
         });
     }
+
+    // Listener do botão Cancelar exclusão
+    const btnCancelar = document.getElementById("btn-cancelar-exclusao");
+    if (btnCancelar) {
+        btnCancelar.addEventListener("click", () => {
+            fecharModalExcluir();
+        });
+    }
 }
 
 function abrirModalEditar(id) {
@@ -435,6 +443,7 @@ function abrirModalExcluir(id) {
 function fecharModalExcluir() {
     document.getElementById("modal-confirmar-exclusao").style.display = "none";
 }
+
 
 // ============================
 // FUNÇÕES: Ordenação
@@ -560,4 +569,96 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+// ============================
+// FUNÇÕES: Cadastrar Saídas
+// ============================
+document.addEventListener("DOMContentLoaded", () => {
+    const formSaidas = document.querySelector("form");
+    if (!formSaidas) return;
+
+    // Carregar produtos no Select2
+    const selectProduto = document.getElementById("filtroProdutoSaida");
+    if (selectProduto) {
+        selectProduto.innerHTML = '<option value="">Selecione um produto</option>';
+        fetch("http://localhost:8001/produtos")
+            .then(res => res.json())
+            .then(data => {
+                data.produtos.forEach(p => {
+                    const opt = document.createElement("option");
+                    opt.value = p.id;
+                    opt.textContent = `${p.nome} (Estoque: ${p.quantidade})`;
+                    opt.dataset.quantidade = p.quantidade; // guarda quantidade disponível
+                    selectProduto.appendChild(opt);
+                });
+                $("#filtroProdutoSaida").select2({
+                    width: 'resolve',
+                    placeholder: "Selecione um produto"
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                mostrarToast("Erro ao carregar produtos!", "erro");
+            });
+    }
+
+    // Preencher data/hora atual
+    const inputData = document.getElementById("dataSaida");
+    if (inputData) {
+        const agora = new Date();
+        inputData.value = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,"0")}-${String(agora.getDate()).padStart(2,"0")}T${String(agora.getHours()).padStart(2,"0")}:${String(agora.getMinutes()).padStart(2,"0")}`;
+    }
+
+    // Envio do formulário
+    formSaidas.addEventListener("submit", async e => {
+        e.preventDefault();
+
+        const id_produto = selectProduto.value;
+        const quantidade = parseInt(document.getElementById("quantidadeSaida").value);
+        const data_alteracao = inputData.value;
+
+        if (!id_produto || !quantidade) {
+            mostrarToast("Selecione o produto e informe a quantidade!", "erro");
+            return;
+        }
+
+        // Verificar se quantidade solicitada é maior que estoque
+        const optionSelecionada = selectProduto.selectedOptions[0];
+        const estoqueAtual = parseInt(optionSelecionada.dataset.quantidade);
+        if (quantidade > estoqueAtual) {
+            mostrarToast(`Não é possível retirar mais do que o estoque atual (${estoqueAtual})!`, "erro");
+            return;
+        }
+
+        try {
+            const resp = await fetch("http://localhost:8001/saidas", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id_produto: parseInt(id_produto),
+                    tipo: "Saída",
+                    quantidade: quantidade,
+                    data_alteracao: data_alteracao || null
+                })
+
+            });
+
+            const result = await resp.json();
+
+            if (resp.ok) {
+                mostrarToast(result.mensagem || "Saída registrada com sucesso!", "sucesso");
+                formSaidas.reset();
+                $("#filtroProdutoSaida").val(null).trigger("change");
+
+                // Atualiza data/hora
+                const agora = new Date();
+                inputData.value = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,"0")}-${String(agora.getDate()).padStart(2,"0")}T${String(agora.getHours()).padStart(2,"0")}:${String(agora.getMinutes()).padStart(2,"0")}`;
+            } else {
+                mostrarToast(result.detail || "Erro ao registrar saída", "erro");
+            }
+        } catch (err) {
+            console.error(err);
+            mostrarToast("Erro de conexão com a API", "erro");
+        }
+    });
+});
 
