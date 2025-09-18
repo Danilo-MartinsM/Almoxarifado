@@ -101,15 +101,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Carrega categorias fixas no select
         const categoriasFixas = ['Insumos', 'Vasos', 'Caixas', 'Porta Vaso', 'Fita Cetim', 'Liga Elástica', 'Etiquetas'];
-        const select = document.getElementById("categoriaProduto");
-        select.innerHTML = '<option value="">Selecione</option>';
+        const selectCategoria = document.getElementById("categoriaProduto");
+        selectCategoria.innerHTML = '<option value="">Selecione</option>';
         categoriasFixas.forEach(c => {
             const option = document.createElement("option");
             option.value = c;
             option.textContent = c;
-            select.appendChild(option);
+            selectCategoria.appendChild(option);
         });
+
+        // Inicializa Select2 **após adicionar as opções**
         $("#categoriaProduto").select2({ width: 'resolve' });
+
+
     }
 });
 

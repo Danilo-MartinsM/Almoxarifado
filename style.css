@@ -517,6 +517,7 @@ table.tabela-padrao thead th {
 /*============================
   SELECT2 CORRIGIDO
 ============================*/
+
 .select2-container--default .select2-selection--single {
   height: 38px !important;
   display: flex !important;
@@ -531,13 +532,13 @@ table.tabela-padrao thead th {
   box-sizing: border-box !important;
 }
 
-/* Corrige a borda ao focar */
+/* Borda ao focar */
 .select2-container--default.select2-container--focus .select2-selection--single {
   border-color: #008080 !important;
   box-shadow: none !important;
 }
 
-/* Corrige a seta */
+/* Seta */
 .select2-container--default .select2-selection--single .select2-selection__arrow {
   height: 38px !important;
   top: 0 !important;
@@ -557,11 +558,12 @@ table.tabela-padrao thead th {
   cursor: pointer;
 }
 
-/* Hover na opção */
+/* Hover */
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
   background-color: #008080;
   color: white;
 }
+
 
 
 /*============================
