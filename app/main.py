@@ -30,7 +30,7 @@ class Produto(BaseModel):
     nome: str
     categoria: Literal['Insumos', 'Vasos', 'Caixas', 'Porta Vaso', 'Fita Cetim', 'Liga Elástica', 'Etiquetas']
     quantidade: int = 0
-    dataAlteracao: Optional[datetime] = None  # agora podemos enviar data
+    
 
 class Movimentacao(BaseModel):
     id_produto: int

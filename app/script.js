@@ -334,7 +334,7 @@ async function carregarProdutos() {
                 <td>${prod.id}</td>
                 <td>${prod.nome}</td>
                 <td>${prod.categoria || "Sem categoria"}</td>
-                <td>${prod.quantidade_inicial}</td>
+                <td>${prod.quantidade}</td>
                 <td>${prod.ultima_alteracao ? new Date(prod.ultima_alteracao).toLocaleString("pt-BR") : '—'}</td>
                 <td>
                     <button class="btn-editar" data-id="${prod.id}">Editar</button>
