@@ -288,8 +288,12 @@ function atualizarCalendar(movimentacoes) {
 function mostrarToast(mensagem, tipo) {
     const container = document.getElementById("toast-container");
     const toast = document.createElement("div");
-    toast.className = `toast ${tipo}`;
+
+    // 🔹 Só aceita "sucesso" ou "erro"
+    const classe = tipo === "sucesso" ? "success" : "error";
+    toast.className = `toast ${classe}`;
     toast.innerText = mensagem;
+
     container.appendChild(toast);
 
     requestAnimationFrame(() => {
