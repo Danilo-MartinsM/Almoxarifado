@@ -74,17 +74,14 @@ def listar_categorias():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        cursor.execute("SELECT DISTINCT categoria FROM produtos")
+        cursor.execute("SELECT id, nome FROM categorias ORDER BY nome")
         categorias = cursor.fetchall()
-        # Ajusta formato para o frontend
-        categorias = [{"nome": c["categoria"]} for c in categorias]
         return {"categorias": categorias}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         cursor.close()
         conn.close()
-
 
 
 @app.post("/movimentacoes")
@@ -157,5 +154,4 @@ def listar_movimentacoes():
     finally:
         cursor.close()
         conn.close()
-
 

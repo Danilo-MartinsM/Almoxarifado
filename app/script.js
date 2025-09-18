@@ -1,17 +1,30 @@
 // ============================
-// script.js - Página Inicial
+// script.js - Página Inicial (com toggle do marcador e eventos sempre visíveis)
 // ============================
 
-// 🔹 Executa quando o DOM estiver carregado
+// 🔹 Variáveis globais
+let calendar;               // instância do FullCalendar
+let dataSelecionada = "";   // guarda a data clicada para filtro
+
+// ============================
+// DOMContentLoaded
+// ============================
 document.addEventListener("DOMContentLoaded", () => {
-    // Inicializa filtros, movimentações e calendar
-    carregarFiltros();
-    carregarMovimentacoes();
     inicializarCalendar();
 
-    // Atualizar movimentações quando mudar filtros
-    document.getElementById("filtroProduto").addEventListener("change", carregarMovimentacoes);
-    document.getElementById("filtroCategoria").addEventListener("change", carregarMovimentacoes);
+    carregarFiltros()
+        .then(() => {
+            // Registra handlers dos filtros usando jQuery + Select2
+            $("#filtroProduto").on("change", carregarMovimentacoes);
+            $("#filtroCategoria").on("change", carregarMovimentacoes);
+
+            // Primeira carga de movimentações
+            carregarMovimentacoes();
+        })
+        .catch(err => {
+            console.error("Erro ao inicializar filtros:", err);
+            mostrarToast("Erro ao carregar filtros!", "erro");
+        });
 });
 
 // ============================
@@ -19,10 +32,12 @@ document.addEventListener("DOMContentLoaded", () => {
 // ============================
 async function carregarMovimentacoes() {
     try {
-        const produtoFiltro = document.getElementById("filtroProduto").value;
-        const categoriaFiltro = document.getElementById("filtroCategoria").value;
+        // Normaliza filtros
+        const produtoFiltroRaw = document.getElementById("filtroProduto").value || "";
+        const categoriaFiltroRaw = document.getElementById("filtroCategoria").value || "";
+        const produtoFiltro = produtoFiltroRaw.trim().toLowerCase();
+        const categoriaFiltro = categoriaFiltroRaw.trim().toLowerCase();
 
-        // Requisição GET para API de movimentações
         const response = await fetch("http://localhost:8001/movimentacoes");
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
@@ -30,23 +45,28 @@ async function carregarMovimentacoes() {
         const container = document.querySelector(".movimentacao-list");
         container.innerHTML = "";
 
-        // Filtra movimentações pelo produto e categoria selecionados
-        let movimentacoes = data.movimentacoes;
+        let movimentacoes = data.movimentacoes || [];
+
+        // Filtra por produto e categoria
         if (produtoFiltro) {
-            movimentacoes = movimentacoes.filter(m => m.produto === produtoFiltro);
+            movimentacoes = movimentacoes.filter(m => (m.produto || "").trim().toLowerCase() === produtoFiltro);
         }
         if (categoriaFiltro) {
-            movimentacoes = movimentacoes.filter(m => m.categoria === categoriaFiltro);
+            movimentacoes = movimentacoes.filter(m => (m.categoria || "").trim().toLowerCase() === categoriaFiltro);
         }
 
-        // Exibe movimentações no estilo .product-item
-        movimentacoes.forEach(mov => {
+        // Filtra por data selecionada apenas para exibição na lista
+        let movimentacoesParaLista = movimentacoes;
+        if (dataSelecionada) {
+            movimentacoesParaLista = movimentacoes.filter(m => (m.data_alteracao || "").substring(0, 10) === dataSelecionada);
+        }
+
+        // Exibe movimentações na lista
+        movimentacoesParaLista.forEach(mov => {
             const divMov = document.createElement("div");
             divMov.classList.add("product-item");
 
-            // Escolhe ícone baseado no tipo de movimentação
             const icon = mov.tipo === "Entrada" ? "📥" : "📦";
-
             divMov.innerHTML = `
                 <div class="product-icon">${icon}</div>
                 <div>
@@ -59,16 +79,18 @@ async function carregarMovimentacoes() {
             container.appendChild(divMov);
         });
 
-        if (movimentacoes.length === 0) {
+        if (movimentacoesParaLista.length === 0) {
             container.innerHTML = "<p>Nenhuma movimentação encontrada.</p>";
         }
+
+        // Atualiza calendário com todos os eventos
+        atualizarCalendar(movimentacoes);
 
     } catch (error) {
         console.error("Erro ao carregar movimentações:", error);
         mostrarToast("Erro ao carregar movimentações!", "erro");
     }
 }
-
 
 // ============================
 // FUNÇÃO: Carregar filtros de produto e categoria
@@ -91,7 +113,7 @@ async function carregarFiltros() {
         $("#filtroProduto").select2({ width: 'resolve' });
 
         // ===== Filtro de Categoria =====
-        const categorias = [...new Set(data.produtos.map(p => p.categoria))];
+        const categorias = [...new Set(data.produtos.map(p => p.categoria).filter(c => c))];
         const selectCategoria = document.getElementById("filtroCategoria");
         selectCategoria.innerHTML = '<option value="">Todas</option>';
         categorias.forEach(c => {
@@ -104,7 +126,7 @@ async function carregarFiltros() {
 
     } catch (error) {
         console.error("Erro ao carregar filtros:", error);
-        mostrarToast("Erro ao carregar filtros!", "erro");
+        throw error;
     }
 }
 
@@ -114,19 +136,67 @@ async function carregarFiltros() {
 function inicializarCalendar() {
     const calendarEl = document.getElementById('calendar');
 
-    const calendar = new FullCalendar.Calendar(calendarEl, {
+    calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'pt-br',
-        weekNumbers: true, // MOSTRA O NÚMERO DA SEMANA
+        weekNumbers: true,
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
-        dayMaxEvents: true
+        dayMaxEvents: true,
+
+        // 🔹 Clique em um dia (toggle marcador azul)
+        dateClick: function(info) {
+            if (dataSelecionada === info.dateStr) {
+                // clicou no mesmo dia → remove marcador
+                calendar.getEvents().forEach(ev => {
+                    if (ev.title === "Selecionado") ev.remove();
+                });
+                dataSelecionada = "";
+            } else {
+                // remove marcador antigo
+                calendar.getEvents().forEach(ev => {
+                    if (ev.title === "Selecionado") ev.remove();
+                });
+                dataSelecionada = info.dateStr;
+                calendar.addEvent({
+                    title: 'Selecionado',
+                    start: dataSelecionada,
+                    allDay: true,
+                    color: 'rgba(0, 123, 255, 0.2)' // azul suave
+                });
+            }
+
+            // atualiza lista de movimentações
+            carregarMovimentacoes();
+        }
     });
 
     calendar.render();
+}
+
+// ============================
+// FUNÇÃO: Atualizar eventos no calendário
+// ============================
+function atualizarCalendar(movimentacoes) {
+    if (!calendar) return;
+
+    // remove apenas eventos de movimentações (mantendo marcador azul)
+    calendar.getEvents().forEach(ev => {
+        if (ev.title !== "Selecionado") ev.remove();
+    });
+
+    movimentacoes.forEach(mov => {
+        const titulo = `${mov.produto} (${mov.tipo}: ${mov.quantidade})`;
+
+        calendar.addEvent({
+            title: titulo,
+            start: mov.data_alteracao,
+            color: mov.tipo === "Entrada" ? "green" : "red"
+        });
+    });
 }
 
 // ============================
@@ -137,15 +207,12 @@ function mostrarToast(mensagem, tipo) {
     const toast = document.createElement("div");
     toast.className = `toast ${tipo}`;
     toast.innerText = mensagem;
-
     container.appendChild(toast);
 
-    // Animação de entrada
     requestAnimationFrame(() => {
         toast.style.animation = 'slideIn 0.3s forwards';
     });
 
-    // Remove o toast com fadeOut após 3s
     setTimeout(() => {
         toast.style.animation = 'fadeOut 0.3s forwards';
         toast.addEventListener('animationend', () => toast.remove());

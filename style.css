@@ -704,3 +704,20 @@ select:disabled {
 
 
 
+/* Ajusta layout principal */
+.main-content {
+    display: flex;
+    gap: 20px; /* espaço entre tabela e calendário */
+}
+
+/* Lista de movimentações (tabela) */
+.movimentacao-list {
+    flex: 2;         
+    max-width: 100%;  
+}
+
+/* Aside do calendário */
+.calendar {
+    flex: 2;         
+    max-width: 40%;  
+}
