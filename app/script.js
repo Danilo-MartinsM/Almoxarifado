@@ -33,6 +33,25 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
     const formCadastro = document.getElementById("form-cadastro");
     if (formCadastro) {  // só executa se a página tiver esse formulário
+
+        // 🔹 Função que preenche input de data/hora atual
+        function preencherDataHoraAtual() {
+            const inputData = document.getElementById("dataAlteracao");
+            if (inputData) {
+                const agora = new Date();
+                const ano = agora.getFullYear();
+                const mes = String(agora.getMonth() + 1).padStart(2, "0");
+                const dia = String(agora.getDate()).padStart(2, "0");
+                const horas = String(agora.getHours()).padStart(2, "0");
+                const minutos = String(agora.getMinutes()).padStart(2, "0");
+
+                inputData.value = `${ano}-${mes}-${dia}T${horas}:${minutos}`;
+            }
+        }
+
+        // 🔹 Preenche na inicialização da página
+        preencherDataHoraAtual();
+
         formCadastro.addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -53,7 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 dataAlteracao: dataAlteracao ? dataAlteracao.replace("T", " ") : undefined
             };
 
-
             try {
                 const response = await fetch("http://localhost:8001/produtos", {
                     method: "POST",
@@ -71,6 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Limpa o formulário
                 formCadastro.reset();
                 $("#categoriaProduto").val("").trigger('change');
+
+                // 🔹 Reaplica a data/hora atual após o submit
+                preencherDataHoraAtual();
 
             } catch (error) {
                 console.error(error);
@@ -91,6 +112,8 @@ document.addEventListener("DOMContentLoaded", () => {
         $("#categoriaProduto").select2({ width: 'resolve' });
     }
 });
+
+
 
 // ============================
 // FUNÇÃO: Buscar e exibir movimentações

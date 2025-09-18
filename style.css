@@ -140,10 +140,9 @@ h3 {
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 0.8rem;
-  margin-top: 0.5rem;
-  border-radius: 8px;
+  padding: 0.5rem;
   border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .form-group textarea {
@@ -726,3 +725,5 @@ select:disabled {
     background-color: rgba(121, 158, 25, 0.2) !important;
     border-radius: 4px;
 }
+
+
