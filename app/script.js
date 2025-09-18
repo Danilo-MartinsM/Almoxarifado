@@ -309,3 +309,60 @@ function mostrarToast(mensagem, tipo) {
         toast.addEventListener('animationend', () => toast.remove());
     }, 3000);
 }
+
+// ============================
+// FUNÇÃO: Carregar produtos na tabela
+// ============================
+async function carregarProdutos() {
+    try {
+        const response = await fetch("http://localhost:8001/produtos");
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+
+        const produtos = data.produtos || [];
+        const tbody = document.querySelector("#tabela-produtos tbody");
+        tbody.innerHTML = "";
+
+        if (produtos.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Nenhum produto encontrado.</td></tr>`;
+            return;
+        }
+
+        produtos.forEach(prod => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${prod.id}</td>
+                <td>${prod.nome}</td>
+                <td>${prod.categoria || "Sem categoria"}</td>
+                <td>${prod.quantidade_inicial}</td>
+                <td>${prod.ultima_alteracao ? new Date(prod.ultima_alteracao).toLocaleString("pt-BR") : '—'}</td>
+                <td>
+                    <button class="btn-editar" data-id="${prod.id}">Editar</button>
+                    <button class="btn-excluir" data-id="${prod.id}">Excluir</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Registrar eventos dos botões
+        document.querySelectorAll(".btn-editar").forEach(btn => {
+            btn.addEventListener("click", () => abrirModalEditar(btn.dataset.id));
+        });
+        document.querySelectorAll(".btn-excluir").forEach(btn => {
+            btn.addEventListener("click", () => abrirModalExcluir(btn.dataset.id));
+        });
+
+    } catch (error) {
+        console.error("Erro ao carregar produtos:", error);
+        mostrarToast("Erro ao carregar produtos!", "erro");
+    }
+}
+
+// ============================
+// Executa ao carregar a página
+// ============================
+document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector("#tabela-produtos")) {
+        carregarProdutos();
+    }
+});

@@ -126,6 +126,62 @@ def criar_produto(produto: Produto):
     finally:
         cursor.close()
         conn.close()
+        # ============================
+# ENDPOINT: Atualizar produto
+# ============================
+@app.put("/produtos/{produto_id}")
+def atualizar_produto(produto_id: int, produto: Produto):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Verifica se o produto existe
+        cursor.execute("SELECT id FROM produtos WHERE id=%s", (produto_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Produto não encontrado")
+
+        # Atualiza o produto
+        cursor.execute(
+            "UPDATE produtos SET nome=UPPER(%s), categoria=%s WHERE id=%s",
+            (produto.nome, produto.categoria, produto_id)
+        )
+        conn.commit()
+        return {"mensagem": "Produto atualizado com sucesso!"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ============================
+# ENDPOINT: Deletar produto (com cascata em movimentações)
+# ============================
+@app.delete("/produtos/{produto_id}")
+def deletar_produto(produto_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Verifica se o produto existe
+        cursor.execute("SELECT id FROM produtos WHERE id=%s", (produto_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Produto não encontrado")
+
+        # Deleta movimentações relacionadas
+        cursor.execute("DELETE FROM movimentacoes WHERE id_produto=%s", (produto_id,))
+
+        # Deleta o produto
+        cursor.execute("DELETE FROM produtos WHERE id=%s", (produto_id,))
+
+        conn.commit()
+        return {"mensagem": "Produto e movimentações deletadas com sucesso!"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+
 
 
 
