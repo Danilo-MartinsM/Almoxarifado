@@ -318,6 +318,7 @@ tr:hover {
   flex-wrap: wrap;
   gap: 1rem;
   align-items: center;
+  gap: 10px;
 }
 
 .filtro-texto {
@@ -556,12 +557,6 @@ table.tabela-padrao thead th {
 .select2-container--default .select2-results__option {
   padding: 8px 12px;
   cursor: pointer;
-}
-
-/* Hover */
-.select2-container--default .select2-results__option--highlighted[aria-selected] {
-  background-color: #008080;
-  color: white;
 }
 
 

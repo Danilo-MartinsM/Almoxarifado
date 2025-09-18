@@ -126,7 +126,8 @@ def criar_produto(produto: Produto):
     finally:
         cursor.close()
         conn.close()
-        # ============================
+
+# ============================
 # ENDPOINT: Atualizar produto
 # ============================
 @app.put("/produtos/{produto_id}")
@@ -152,7 +153,6 @@ def atualizar_produto(produto_id: int, produto: Produto):
     finally:
         cursor.close()
         conn.close()
-
 
 # ============================
 # ENDPOINT: Deletar produto (com cascata em movimentações)
@@ -184,7 +184,6 @@ def deletar_produto(produto_id: int):
 
 
 
-
 # ============================
 # ENDPOINTS DE LISTAGEM
 # ============================
@@ -193,7 +192,13 @@ def listar_produtos():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT * FROM produtos")
+        cursor.execute("""
+            SELECT p.id, p.nome, p.categoria, p.quantidade,
+                   MAX(m.data_alteracao) AS ultima_alteracao
+            FROM produtos p
+            LEFT JOIN movimentacoes m ON m.id_produto = p.id
+            GROUP BY p.id, p.nome, p.categoria, p.quantidade
+        """)
         produtos = cursor.fetchall()
         return {"produtos": produtos}
     except Exception as e:
@@ -201,6 +206,7 @@ def listar_produtos():
     finally:
         cursor.close()
         conn.close()
+
 
 @app.get("/categorias")
 def listar_categorias():
