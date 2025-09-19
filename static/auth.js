@@ -60,7 +60,7 @@ function getNomeUsuario() {
 function logout() {
     console.log("[DEBUG] Logout executado");
     localStorage.removeItem("token");
-    window.location.href = "/login.html";
+    window.location.href = "static/index.html";
 }
 
 // Atualiza o nome do usuário em páginas protegidas
