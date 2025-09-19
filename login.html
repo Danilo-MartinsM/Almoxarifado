@@ -6,6 +6,9 @@
   <title>Login - naturAYO</title>
   <link rel="stylesheet" href="style-login.css" />
   <link rel="shortcut icon" href="imagens/favicon.ico" type="image/x-icon" />
+
+  <script src="auth.js"></script>
+
 </head>
 <body>
   <div class="container">
@@ -14,7 +17,7 @@
       <h2>Bem-vindo</h2>
       <p>Faça login para acessar o sistema de controle de estoque.</p>
       <form id="login-form">
-        <input type="text" name="username" placeholder="Usuário" required />
+        <input type="text" name="nome" placeholder="Usuário" required />
         <input type="password" name="senha" placeholder="Senha" required />
         <button type="submit">Entrar</button>
       </form>
@@ -27,6 +30,6 @@
 
 
 
-<script src="script.js"></script>
+<script src="app/script.login.js"></script>
 </body>
 </html>

@@ -4,6 +4,8 @@ from typing import Literal, Optional
 from database import get_connection
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timedelta
+from auth import criar_token, validar_usuario
+
 
 app = FastAPI()
 
@@ -26,6 +28,12 @@ app.add_middleware(
 # ============================
 # MODELOS
 # ============================
+
+# Modelo de login via JSON
+class LoginRequest(BaseModel):
+    nome: str
+    senha: str
+    
 class Produto(BaseModel):
     nome: str
     categoria: Literal['Insumos', 'Vasos', 'Caixas', 'Porta Vaso', 'Fita Cetim', 'Liga Elástica', 'Etiquetas']
@@ -50,6 +58,25 @@ class Movimentacao(BaseModel):
 # Função auxiliar para hora de Brasília
 def hora_brasilia():
     return datetime.utcnow() - timedelta(hours=3)
+
+
+
+@app.post("/login")
+def login(request: LoginRequest):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT * FROM usuarios WHERE nome = %s", (request.nome,))
+        user = cursor.fetchone()
+        if not user or not validar_usuario(request.senha, user["senha"]):
+            raise HTTPException(status_code=401, detail="Usuário ou senha incorretos")
+        
+        token = criar_token(user["nome"])
+        return {"access_token": token, "token_type": "bearer"}
+    finally:
+        cursor.close()
+        conn.close()
+
 
 # ============================
 # FUNÇÃO AUXILIAR: criar movimentação
