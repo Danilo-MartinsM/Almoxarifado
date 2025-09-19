@@ -14,7 +14,6 @@ function verificarLogin() {
     const token = getToken();
     if (!token) {
         console.warn("[DEBUG] Token ausente. Redirecionando para login...");
-        // logout(); // opcional: redirecionar apenas se necessário
         return false;
     }
 
@@ -26,7 +25,6 @@ function verificarLogin() {
         const now = Math.floor(Date.now() / 1000);
         if (payload.exp && now > payload.exp) {
             console.warn("[DEBUG] Token expirado");
-            // logout();
             return false;
         }
 
@@ -34,7 +32,6 @@ function verificarLogin() {
         return true;
     } catch (err) {
         console.error("[DEBUG] Token inválido:", err);
-        // logout();
         return false;
     }
 }
@@ -127,13 +124,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ nome, senha })
             });
 
+            const data = await response.json(); // <-- chama apenas uma vez
+
             if (!response.ok) {
-                const data = await response.json();
                 mensagem.textContent = data.detail || "Erro ao fazer login";
                 return;
             }
 
-            const data = await response.json();
             console.log("[DEBUG] Login bem-sucedido. Token recebido:", data.access_token);
             localStorage.setItem("token", data.access_token);
 
@@ -141,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
             atualizarNomeUsuario();
 
             // Redireciona para a dashboard
-            window.location.href = "/1_dashboard.html";
+            window.location.href = "static/1_dashboard.html";
 
         } catch (err) {
             console.error("[DEBUG] Erro de conexão com o servidor:", err);
