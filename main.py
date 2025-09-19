@@ -5,9 +5,21 @@ from database import get_connection
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timedelta
 from auth import criar_token, validar_usuario
-
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
 
 app = FastAPI()
+
+# Servir todos os arquivos da pasta static
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Rota principal
+@app.get("/")
+def root():
+    return FileResponse(os.path.join("static", "index.html"))
+
+
 
 origins = [
     "http://localhost",
