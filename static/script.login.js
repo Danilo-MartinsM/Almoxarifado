@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("token", data.access_token);
 
       // Redireciona para a dashboard
-      window.location.href = "../1_dashboard.html";
+      window.location.href = "static/1_dashboard.html";
 
     } catch (err) {
       console.error(err);
