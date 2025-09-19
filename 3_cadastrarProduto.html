@@ -52,10 +52,16 @@
           <select id="categoriaProduto" name="categoriaProduto" required style="width: 200px;"></select>
         </div>
 
-
         <div class="form-group">
           <label for="dataAlteracao">Data de Entrada</label>
-          <input type="datetime-local" id="dataAlteracao" name="dataAlteracao" required/>
+          
+          <!-- Mostra para o usuário (estilizado) -->
+          <span id="dataExibida" 
+                style="display: block; padding: 8px 12px; background: #f5f5f5; border: 1px solid #ccc; border-radius: 6px; font-family: Inter, sans-serif; font-size: 14px; color: #333; width: 200px;">
+          </span>
+
+          <!-- Envia para o backend (escondido) -->
+          <input type="datetime-local" id="dataAlteracao" name="dataAlteracao" hidden />
         </div>
 
         <div class="form-group">
@@ -73,5 +79,22 @@
   <script src="app/auth.js"></script>
 
   <script src="app/script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Pega a data/hora atual no formato YYYY-MM-DDTHH:MM
+      const agora = new Date();
+      const offset = agora.getTimezoneOffset();
+      const localDate = new Date(agora.getTime() - offset * 60000);
+      const valor = localDate.toISOString().slice(0,16);
+
+      // Preenche o input escondido
+      const input = document.getElementById("dataAlteracao");
+      input.value = valor;
+
+      // Exibe para o usuário em formato legível
+      const dataFormatada = agora.toLocaleDateString("pt-BR") + " " + agora.toLocaleTimeString("pt-BR");
+      document.getElementById("dataExibida").textContent = dataFormatada;
+    });
+  </script>
 </body>
 </html>

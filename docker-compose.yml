@@ -1,0 +1,30 @@
+services:
+  backend:
+    build: ./app
+    container_name: naturayo-backend
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./app:/app
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+      MYSQL_DATABASE: estoque
+    depends_on:
+      - db
+
+  db:
+    image: mysql:9.0.1
+    container_name: naturayo-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: estoque
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
