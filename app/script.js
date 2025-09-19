@@ -170,7 +170,7 @@ function renderizarMovimentacoesPaginadas(movimentacoes) {
             const divMov = document.createElement("div");
             divMov.classList.add("product-item");
             divMov.innerHTML = `
-                <div class="product-icon">${mov.tipo === "Entrada" ? "📥" : "📦"}</div>
+                <div class="product-icon">${mov.tipo === "Entrada" ? "📥" : mov.tipo === "Saída" ? "📦" : "📝"}</div>
                 <div>
                     <strong>${mov.produto}</strong><br/>
                     <small>Tipo: ${mov.tipo}</small><br/>
@@ -600,9 +600,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     id_produto: parseInt(id_produto),
                     tipo: "Entrada", 
                     quantidade: parseInt(quantidade),
-                    // Envia o horário exatamente como está no input (sem conversão para UTC)
-                    data_alteracao: data_alteracao ? data_alteracao.replace("T", " ") : undefined
+                    data_alteracao: data_alteracao || undefined 
                 })
+
             });
 
             const result = await resp.json();

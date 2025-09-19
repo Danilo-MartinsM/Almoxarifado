@@ -29,7 +29,6 @@ app.add_middleware(
 # MODELOS
 # ============================
 
-# Modelo de login via JSON
 class LoginRequest(BaseModel):
     nome: str
     senha: str
@@ -42,23 +41,25 @@ class Produto(BaseModel):
 
 class Movimentacao(BaseModel):
     id_produto: int
-    tipo: Literal['Entrada', 'Saída']
+    tipo: Literal['Entrada', 'Saída', 'Cadastro']
     quantidade: int
     data_alteracao: Optional[datetime] = None
     
     @validator("data_alteracao", pre=True)
     def parse_datetime_local(cls, v):
         if isinstance(v, str):
-            try:
-                return datetime.strptime(v, "%Y-%m-%dT%H:%M")
-            except ValueError:
-                return v
+            for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M"):
+                try:
+                    return datetime.strptime(v, fmt)
+                except ValueError:
+                    continue
+            raise ValueError(f"Formato de data inválido: {v}")
         return v
+
 
 # Função auxiliar para hora de Brasília
 def hora_brasilia():
     return datetime.utcnow() - timedelta(hours=3)
-
 
 
 @app.post("/login")
@@ -109,7 +110,7 @@ def criar_movimentacao(mov: Movimentacao, conn=None):
             (nova_quantidade, mov.id_produto)
         )
 
-        # insere movimentação com data/hora do frontend ou datetime.now()
+        # insere movimentação (usa data do front ou agora)
         data = mov.data_alteracao or datetime.now()
         cursor.execute(
             "INSERT INTO movimentacoes (id_produto, tipo, quantidade, data_alteracao) VALUES (%s, %s, %s, %s)",
@@ -128,6 +129,7 @@ def criar_movimentacao(mov: Movimentacao, conn=None):
         if close_conn:
             conn.close()
 
+
 # ============================
 # ENDPOINT: Criar produto
 # ============================
@@ -136,30 +138,42 @@ def criar_produto(produto: Produto):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        # insere produto
-        cursor.execute(
-            "INSERT INTO produtos (nome, categoria, quantidade) VALUES (UPPER(%s), %s, %s)",
-            (produto.nome, produto.categoria, produto.quantidade)
-        )
+        # Inserir produto
+        cursor.execute("""
+            INSERT INTO produtos (nome, categoria, quantidade)
+            VALUES (UPPER(%s), %s, %s)
+        """, (produto.nome, produto.categoria, produto.quantidade))
         conn.commit()
-        id_produto = cursor.lastrowid
+        produto_id = cursor.lastrowid
 
-        # registra movimentação de entrada
+        # Registrar movimentação de entrada
+        data_mov = getattr(produto, "dataAlteracao", None)
+        if isinstance(data_mov, str):
+            try:
+                data_mov = datetime.strptime(data_mov, "%Y-%m-%dT%H:%M")
+            except ValueError:
+                data_mov = datetime.now()
+        elif data_mov is None:
+            data_mov = datetime.now()
+
         mov = Movimentacao(
-            id_produto=id_produto,
-            tipo="Entrada",
+            id_produto=produto_id,
+            tipo="Cadastro",
             quantidade=produto.quantidade,
-            data_alteracao=produto.dataAlteracao  # se None, será datetime.now() na função
+            data_alteracao=data_mov
         )
+
         criar_movimentacao(mov, conn)
 
-        return {"mensagem": "Produto criado e movimentação registrada com sucesso!"}
+        return {"mensagem": "Produto criado e movimentação registrada com sucesso!", "id": produto_id}
+
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         cursor.close()
         conn.close()
+
 
 # ============================
 # ENDPOINT: Atualizar produto
@@ -169,12 +183,10 @@ def atualizar_produto(produto_id: int, produto: Produto):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        # Verifica se o produto existe
         cursor.execute("SELECT id FROM produtos WHERE id=%s", (produto_id,))
         if not cursor.fetchone():
             raise HTTPException(status_code=404, detail="Produto não encontrado")
 
-        # Atualiza o produto
         cursor.execute(
             "UPDATE produtos SET nome=UPPER(%s), categoria=%s WHERE id=%s",
             (produto.nome, produto.categoria, produto_id)
@@ -188,23 +200,20 @@ def atualizar_produto(produto_id: int, produto: Produto):
         cursor.close()
         conn.close()
 
+
 # ============================
-# ENDPOINT: Deletar produto (com cascata em movimentações)
+# ENDPOINT: Deletar produto
 # ============================
 @app.delete("/produtos/{produto_id}")
 def deletar_produto(produto_id: int):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        # Verifica se o produto existe
         cursor.execute("SELECT id FROM produtos WHERE id=%s", (produto_id,))
         if not cursor.fetchone():
             raise HTTPException(status_code=404, detail="Produto não encontrado")
 
-        # Deleta movimentações relacionadas
         cursor.execute("DELETE FROM movimentacoes WHERE id_produto=%s", (produto_id,))
-
-        # Deleta o produto
         cursor.execute("DELETE FROM produtos WHERE id=%s", (produto_id,))
 
         conn.commit()
@@ -215,7 +224,6 @@ def deletar_produto(produto_id: int):
     finally:
         cursor.close()
         conn.close()
-
 
 
 # ============================
@@ -256,12 +264,14 @@ def listar_categorias():
         cursor.close()
         conn.close()
 
+
 # ============================
 # ENDPOINT: Movimentações
 # ============================
 @app.post("/movimentacoes")
 def criar_movimentacao_endpoint(mov: Movimentacao):
     return criar_movimentacao(mov)
+
 
 @app.get("/movimentacoes")
 def listar_movimentacoes(
@@ -305,7 +315,6 @@ def listar_movimentacoes(
         cursor.execute(query, tuple(params))
         movimentacoes = cursor.fetchall()
 
-        # total de registros para paginação
         cursor.execute(f"SELECT COUNT(*) as total FROM movimentacoes m {where_clause}", tuple(params[:-2]))
         total = cursor.fetchone()["total"]
 
@@ -348,17 +357,28 @@ def movimentacoes_calendario():
 # ============================
 # ENDPOINT: Registrar Entrada
 # ============================
-
 @app.post("/entradas")
 def registrar_entrada(mov: Movimentacao = Body(...)):
-    # força o tipo como Entrada, caso queira ignorar o que vier do frontend
     mov.tipo = "Entrada"
+    # Garantir que datetime inclua segundos
+    if mov.data_alteracao and isinstance(mov.data_alteracao, str):
+        try:
+            mov.data_alteracao = datetime.strptime(mov.data_alteracao, "%Y-%m-%dT%H:%M:%S")
+        except ValueError:
+            mov.data_alteracao = datetime.strptime(mov.data_alteracao, "%Y-%m-%dT%H:%M")
     return criar_movimentacao(mov)
 
+
 # ============================
-# ENDPOINT: Registrar Sáida
+# ENDPOINT: Registrar Saída
 # ============================
 @app.post("/saidas")
 def registrar_saida(mov: Movimentacao = Body(...)):
     mov.tipo = "Saída"
+    # Garantir que datetime inclua segundos
+    if mov.data_alteracao and isinstance(mov.data_alteracao, str):
+        try:
+            mov.data_alteracao = datetime.strptime(mov.data_alteracao, "%Y-%m-%dT%H:%M:%S")
+        except ValueError:
+            mov.data_alteracao = datetime.strptime(mov.data_alteracao, "%Y-%m-%dT%H:%M")
     return criar_movimentacao(mov)
