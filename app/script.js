@@ -9,6 +9,12 @@ let produtosGlobais = []; // armazenar produtos carregados para edição
 let ordenacaoAtual = { coluna: null, ordem: "asc" }; // estado da ordenação
 
 // ============================
+// Variáveis de paginação
+// ============================
+let paginaAtual = 1;
+const itensPorPagina = 20; // ajuste conforme desejar
+
+// ============================
 // FUNÇÃO: Toast notifications
 // ============================
 function mostrarToast(mensagem, tipo) {
@@ -103,6 +109,9 @@ async function carregarFiltrosMovimentacoes() {
     }
 }
 
+// ============================
+// FUNÇÃO: carregarMovimentacoes
+// ============================
 async function carregarMovimentacoes() {
     const container = document.querySelector(".movimentacao-list");
     if (!container) return;
@@ -111,40 +120,24 @@ async function carregarMovimentacoes() {
         const produtoFiltro = (document.getElementById("filtroProduto")?.value || "").trim().toLowerCase();
         const categoriaFiltro = (document.getElementById("filtroCategoria")?.value || "").trim().toLowerCase();
 
+        // 1️⃣ Pega todas as movimentações da API
         const response = await fetch("http://localhost:8001/movimentacoes");
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const movimentacoes = (await response.json()).movimentacoes || [];
+        const todasMovimentacoes = (await response.json()).movimentacoes || [];
 
-        const filtrar = m => {
+        // 2️⃣ Filtra apenas para a LISTA (paginação)
+        const movimentacoesFiltradas = todasMovimentacoes.filter(m => {
             if (produtoFiltro && (m.produto || "").trim().toLowerCase() !== produtoFiltro) return false;
             if (categoriaFiltro && (m.categoria || "").trim().toLowerCase() !== categoriaFiltro) return false;
             if (dataSelecionada && (m.data_alteracao || "").substring(0, 10) !== dataSelecionada) return false;
             return true;
-        };
+        });
 
-        const movimentacoesFiltradas = movimentacoes.filter(filtrar);
+        // 3️⃣ Renderiza lista filtrada com paginação
+        renderizarMovimentacoesPaginadas(movimentacoesFiltradas);
 
-        container.innerHTML = "";
-        if (movimentacoesFiltradas.length === 0) {
-            container.innerHTML = "<p>Nenhuma movimentação encontrada.</p>";
-        } else {
-            movimentacoesFiltradas.forEach(mov => {
-                const divMov = document.createElement("div");
-                divMov.classList.add("product-item");
-                divMov.innerHTML = `
-                    <div class="product-icon">${mov.tipo === "Entrada" ? "📥" : "📦"}</div>
-                    <div>
-                        <strong>${mov.produto}</strong><br/>
-                        <small>Tipo: ${mov.tipo}</small><br/>
-                        <small>Quantidade: ${mov.quantidade}</small><br/>
-                        <small>Data: ${new Date(mov.data_alteracao).toLocaleString()}</small>
-                    </div>
-                `;
-                container.appendChild(divMov);
-            });
-        }
-
-        atualizarCalendar(movimentacoes);
+        // 4️⃣ Renderiza o CALENDÁRIO com TODAS as movimentações, sem filtro
+        atualizarCalendar(todasMovimentacoes);
 
     } catch (err) {
         console.error(err);
@@ -152,6 +145,71 @@ async function carregarMovimentacoes() {
     }
 }
 
+// ============================
+// FUNÇÃO: Renderizar movimentações com paginação
+// ============================
+function renderizarMovimentacoesPaginadas(movimentacoes) {
+    const container = document.querySelector(".movimentacao-list");
+    if (!container) return;
+
+    const totalItens = movimentacoes.length;
+    const totalPaginas = Math.ceil(totalItens / itensPorPagina);
+
+    // Ajusta a página atual caso esteja fora do range
+    if (paginaAtual > totalPaginas) paginaAtual = totalPaginas || 1;
+
+    const inicio = (paginaAtual - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const itensPagina = movimentacoes.slice(inicio, fim);
+
+    container.innerHTML = "";
+    if (itensPagina.length === 0) {
+        container.innerHTML = "<p>Nenhuma movimentação encontrada.</p>";
+    } else {
+        itensPagina.forEach(mov => {
+            const divMov = document.createElement("div");
+            divMov.classList.add("product-item");
+            divMov.innerHTML = `
+                <div class="product-icon">${mov.tipo === "Entrada" ? "📥" : "📦"}</div>
+                <div>
+                    <strong>${mov.produto}</strong><br/>
+                    <small>Tipo: ${mov.tipo}</small><br/>
+                    <small>Quantidade: ${mov.quantidade}</small><br/>
+                    <small>Data: ${new Date(mov.data_alteracao).toLocaleString()}</small>
+                </div>
+            `;
+            container.appendChild(divMov);
+        });
+    }
+
+    renderizarPaginacao(totalPaginas, movimentacoes);
+}
+
+// ============================
+// FUNÇÃO: Renderizar botões de paginação
+// ============================
+function renderizarPaginacao(totalPaginas, movimentacoes) {
+    const pagContainer = document.querySelector(".pagination");
+    if (!pagContainer) return;
+
+    pagContainer.innerHTML = "";
+
+    for (let i = 1; i <= totalPaginas; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = i;
+        btn.classList.toggle("active", i === paginaAtual);
+        btn.addEventListener("click", () => {
+            paginaAtual = i;
+            renderizarMovimentacoesPaginadas(movimentacoes);
+        });
+        pagContainer.appendChild(btn);
+    }
+}
+
+
+// ============================
+// FUNÇÕES: Calendar
+// ============================
 function inicializarCalendar() {
     const calendarEl = document.getElementById('calendar');
     if (!calendarEl) return;
@@ -542,7 +600,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     id_produto: parseInt(id_produto),
                     tipo: "Entrada", 
                     quantidade: parseInt(quantidade),
-                    data_alteracao: data_alteracao ? new Date(data_alteracao).toISOString() : undefined
+                    // Envia o horário exatamente como está no input (sem conversão para UTC)
+                    data_alteracao: data_alteracao ? data_alteracao.replace("T", " ") : undefined
                 })
             });
 
@@ -567,6 +626,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
 
 
 // ============================

@@ -669,3 +669,22 @@ table.tabela-padrao thead th {
 }
 
 
+.pagination {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.pagination button {
+    margin: 0 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+    border: 1px solid #008080;
+    background-color: #00a3a3;
+    color: white;
+    border-radius: 4px;
+}
+
+.pagination button.active {
+    background-color: #008080;
+    font-weight: bold;
+}

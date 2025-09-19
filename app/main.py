@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, Query
 from pydantic import BaseModel, validator
 from typing import Literal, Optional
 from database import get_connection
@@ -237,11 +237,30 @@ def criar_movimentacao_endpoint(mov: Movimentacao):
     return criar_movimentacao(mov)
 
 @app.get("/movimentacoes")
-def listar_movimentacoes():
+def listar_movimentacoes(
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(100, ge=1, le=100),
+    data_inicio: Optional[str] = None,
+    data_fim: Optional[str] = None
+):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute("""
+        filtros = []
+        params = []
+
+        if data_inicio:
+            filtros.append("m.data_alteracao >= %s")
+            params.append(data_inicio)
+        if data_fim:
+            filtros.append("m.data_alteracao <= %s")
+            params.append(data_fim)
+
+        where_clause = f"WHERE {' AND '.join(filtros)}" if filtros else ""
+
+        offset = (pagina - 1) * limite
+
+        query = f"""
             SELECT 
                 m.id, 
                 p.nome AS produto, 
@@ -251,15 +270,53 @@ def listar_movimentacoes():
                 m.data_alteracao
             FROM movimentacoes m
             JOIN produtos p ON m.id_produto = p.id
+            {where_clause}
             ORDER BY m.data_alteracao DESC
-        """)
+            LIMIT %s OFFSET %s
+        """
+        params.extend([limite, offset])
+        cursor.execute(query, tuple(params))
         movimentacoes = cursor.fetchall()
-        return {"movimentacoes": movimentacoes}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+
+        # total de registros para paginação
+        cursor.execute(f"SELECT COUNT(*) as total FROM movimentacoes m {where_clause}", tuple(params[:-2]))
+        total = cursor.fetchone()["total"]
+
+        return {
+            "movimentacoes": movimentacoes,
+            "pagina": pagina,
+            "limite": limite,
+            "total": total
+        }
     finally:
         cursor.close()
         conn.close()
+
+
+@app.get("/movimentacoes/calendario")
+def movimentacoes_calendario():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT m.id, p.nome AS produto, m.tipo, m.quantidade, m.data_alteracao
+            FROM movimentacoes m
+            JOIN produtos p ON m.id_produto = p.id
+            ORDER BY m.data_alteracao ASC
+        """)
+        eventos = cursor.fetchall()
+        return [
+            {
+                "id": e["id"],
+                "title": f'{e["produto"]} ({e["tipo"]} - {e["quantidade"]})',
+                "start": e["data_alteracao"].isoformat()
+            }
+            for e in eventos
+        ]
+    finally:
+        cursor.close()
+        conn.close()
+
 
 # ============================
 # ENDPOINT: Registrar Entrada
